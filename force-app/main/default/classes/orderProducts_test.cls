@@ -98,10 +98,6 @@ public with sharing class orderProducts_test {
 
             }
 
-             //products to insert
-
-            
-
         }
     }
 
