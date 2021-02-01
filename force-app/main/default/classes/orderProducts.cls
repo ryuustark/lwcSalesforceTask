@@ -3,13 +3,14 @@ public with sharing class orderProducts {
 
     @AuraEnabled(cacheable=true)
     public static List<OrderProductWrapper> getOrderOrderProducts(id orderId) {
+        //Get Products already added to the Order
         List<OrderItem> listOI = [SELECT Product2.id,Product2.Name, ListPrice, Quantity, TotalPrice
                             FROM OrderItem
                             WHERE OrderId =: orderId //8014x0000004N79AAE
                             ORDER BY id];
                             
         List<OrderProductWrapper> OrderProducs = new List<OrderProductWrapper>();
-
+        //Handle Products to show in the table
         for(OrderItem currOI : listOI){
             OrderProductWrapper wrapper = new OrderProductWrapper();
             wrapper.productName = currOI.Product2.Name;
@@ -25,33 +26,31 @@ public with sharing class orderProducts {
 
     @AuraEnabled(cacheable=true)
     public static List<OrderProductWrapper> UpdateOrderProducts(List<OrderProductWrapper> OPw,List<ProductWrapper> productsToInsert, id OrderId) {
+        //Get the products in the Order and the list of products that will be added
         Map<Id,OrderProductWrapper> OrderProducs = new Map<Id,OrderProductWrapper>();
         Map<id, Decimal> productids = new Map<id, Decimal>(); 
         id parentOrderId = OrderId;
         Boolean sendList = false;
 
+        //convert into Map to handle by Product id
         for(OrderProductWrapper tempOrderProduct : OPw)
         {
             OrderProducs.put(tempOrderProduct.productId,tempOrderProduct);
-        }       
-        //System.debug('>>> OrderProducs: ' + OrderProducs);
-        //System.debug('>>> productsToInsert: ' + productsToInsert);
+        }
 
         //Get list of ProductIds from Query
+        //convert into Map to handle by Product id
         for( ProductWrapper tempProductWrapper : productsToInsert){
             productIds.put(tempProductWrapper.productId, tempProductWrapper.listPrice);
-            //System.debug('>>> productIds: ' + tempProductWrapper);
         }        
-        //System.debug('>>> productIds: ' + productIds);
 
+        //Get OrderItem related to the Order
         Map<id,OrderItem> orderItems = new Map<ID, OrderItem>([SELECT Id, ListPrice, Quantity, TotalPrice, Product2.id, Product2.Name, PricebookEntryId, OrderId  
                                     FROM OrderItem
                                     WHERE Product2.id =:productIds.keyset()]); 
         List<OrderItem> oderstoAdd = orderItems.values();
-        //System.debug('>>> orderItems: ' + orderItems);
-        //go through Product List and current Order Products
-        
-        System.debug('>>> Products ' + productsToInsert);
+
+        //go through Product that will be added List and current Order Products
         for(ProductWrapper Product : productsToInsert)
         {
             id currentPricebookEntryId = Product.PricebookEntryId;
@@ -61,7 +60,7 @@ public with sharing class orderProducts {
             OrderProductWrapper newProduct = new OrderProductWrapper();
             OrderItem newOI = new Orderitem();
 
-            System.debug('>>> Product ' + Product);
+            //Verify if the Product already exist on the order
             for(OrderProductWrapper existingProducts : OrderProducs.values())
             {
                 System.debug('>>> existingProducts ' + existingProducts);
@@ -74,6 +73,7 @@ public with sharing class orderProducts {
 
             if(ProdExist)
                 {                
+                    //if Product exist, update it from OrderItem 
                     for(OrderItem tempOI : orderitems.values())
                     {
                         if(tempOI.Product2Id == tempProductId)
@@ -82,16 +82,16 @@ public with sharing class orderProducts {
                         }
 
                     }
-                    System.debug('>>> Product Exist');
+
+                    //increase Quantity
                     exProduct.Quantity ++;        
                     exProduct.totalPrice = exProduct.Quantity * exProduct.ListPrice;
-                    //System.debug('>>> orderItems to modify: ' + exProduct);
                     newOI.Quantity ++;
                     OrderProducs.put(tempProductId,exProduct);
                     orderitems.put(newOI.id,newOI);
                 }else {                
+                    //Need to Add a new Product
                     sendList = true;
-                    System.debug('>>> Product NOT Exist RUUUUUUUUUUUUUM');
                     newProduct.productName = Product.productName;
                     newProduct.productId = tempProductId;
                     newProduct.listPrice = Product.listPrice;
@@ -99,7 +99,7 @@ public with sharing class orderProducts {
                     newProduct.totalPrice = Product.listPrice;
                     OrderProducs.put(tempProductId,newProduct);
 
-                    
+                    //create the OrderItem to insert
                     newOI.OrderId = parentOrderId;
                     newOI.ListPrice = newProduct.listPrice;
                     newOI.UnitPrice = newProduct.listPrice;
@@ -112,12 +112,14 @@ public with sharing class orderProducts {
 
 
         }
+        //Handle upsert of OrderItems in Queubable Apex
         if(!sendList){
             System.enqueueJob( new AsyncOrderInsert(orderItems));
         } else {
             System.enqueueJob( new AsyncOrderInsert(oderstoAdd));
 
         }
+        //return the new list with correct Quantity
         return OrderProducs.values();
     }
 
@@ -127,6 +129,7 @@ public with sharing class orderProducts {
         private List<OrderItem> OIList = new List<OrderItem>();
 
         public AsyncOrderInsert(Map<Id, OrderItem> OIMap) {
+            //convert map into List to handle 
             this.OIList = OIMap.values();
         }
 
@@ -135,6 +138,7 @@ public with sharing class orderProducts {
         }
 
         public void execute(QueueableContext context) {
+            //handle by packs of 50 in case there are more than 50 products added at the same time
             if(this.OIList.size() > 50)
             {
                 for(integer i=0;i< 50; i++)
@@ -146,10 +150,10 @@ public with sharing class orderProducts {
 
             }
             else {
+                //there are less than 50 products
                 OIListUpserted = OIList.clone();
             }
 
-            System.debug('>>> OI Updated: ' + OIListUpserted);
             upsert OIListUpserted;        
 
 

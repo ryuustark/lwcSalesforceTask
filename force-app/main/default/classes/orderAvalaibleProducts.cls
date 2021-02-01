@@ -2,13 +2,14 @@ public with sharing class orderAvalaibleProducts {
 
     @AuraEnabled(cacheable=true)
     public static List<ProductWrapper> getOrderAvalaibleProducts(id PBId) {
+        //Get products from pricebookEntry that are active in the order pricebook
         List<PricebookEntry> listPE = [SELECT Product2.id, Product2.Name, UnitPrice, id
         FROM PricebookEntry
-        WHERE IsActive = true AND PricebookEntry.Pricebook2Id =:PBId //01s4x0000072qiLAAQ
+        WHERE IsActive = true AND PricebookEntry.Pricebook2Id =:PBId 
         ORDER BY Name];
                             
         List<ProductWrapper> OrderProducs = new List<ProductWrapper>();
-        System.debug('>> listPE: ' + listPE);
+        //Set the data in ProductWrapper to show in table and sent it to the Component 2
         for(PricebookEntry currPE : listPE){
             ProductWrapper wrapper = new ProductWrapper();
             wrapper.productName = currPE.Product2.Name;
