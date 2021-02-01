@@ -18,12 +18,34 @@ public with sharing class orderAvalaibleProducts_test {
                 
         testData()
         {
+            Contact contact1 = new Contact(
+                FirstName = 'test contact',
+                LastName = 'Dummy'
+                );
+            insert contact1;
             
-            Account acc = new Account();
-            acc.Name='Test1';
-            
+            Account acc = new Account(
+                Name='Test1');          
             insert acc;
-            
+
+            Contract contract = new Contract(
+                AccountId = acc.id);
+            insert contract;
+
+            standard = new Pricebook2(
+                Id = Test.getStandardPricebookId(),
+                IsActive = true);        
+            update standard;
+
+            Order order = new Order(
+                AccountId = acc.id,
+                ContractId = contract.id,
+                EffectiveDate = Date.today(),
+                Status = 'Draft',
+                Pricebook2Id = standard.id
+                 );
+            insert order;
+
             Product2 newproduct =new Product2();
             newproduct.Name='test';
             newproduct.productCode='1111';
@@ -43,18 +65,6 @@ public with sharing class orderAvalaibleProducts_test {
             Products.add(newproduct3);
 
             insert Products;
-
-            /*standard = new Pricebook2();
-            standard.IsActive = true;
-            standard.Name = 'test Pricebook';
-            insert testPriceBook;*/
-
-            //standard = [Select Id, Name, IsActive, IsStandard From Pricebook2 where IsStandard = true LIMIT 1];
-            
-            standard = new Pricebook2(
-                Id = Test.getStandardPricebookId(),
-                IsActive = true);        
-                update standard;
 
             for(Product2 prod : Products)
             {
