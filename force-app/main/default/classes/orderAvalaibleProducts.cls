@@ -8,7 +8,7 @@ public with sharing class orderAvalaibleProducts {
         ORDER BY Name];
                             
         List<ProductWrapper> OrderProducs = new List<ProductWrapper>();
-
+        System.debug('>> listPE: ' + listPE);
         for(PricebookEntry currPE : listPE){
             ProductWrapper wrapper = new ProductWrapper();
             wrapper.productName = currPE.Product2.Name;
@@ -29,15 +29,5 @@ public with sharing class orderAvalaibleProducts {
         @AuraEnabled public Decimal listPrice{get;set;}
         @AuraEnabled public Id PricebookEntryId{get;set;}
     }
-    /*
-    
-    public class OrderProductWrapper {
-        @AuraEnabled public String productName{get;set;}
-        @AuraEnabled public Id productId{get;set;}
-        @AuraEnabled public Decimal listPrice{get;set;}
-        @AuraEnabled public Decimal Quantity{get;set;}
-        @AuraEnabled public Decimal totalPrice{get;set;}
-    }
-    */
     
 }

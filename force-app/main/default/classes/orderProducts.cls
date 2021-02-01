@@ -74,12 +74,21 @@ public with sharing class orderProducts {
 
             if(ProdExist)
                 {                
+                    for(OrderItem tempOI : orderitems.values())
+                    {
+                        if(tempOI.Product2Id == tempProductId)
+                        {
+                            newOI = tempOI;
+                        }
+
+                    }
                     System.debug('>>> Product Exist');
                     exProduct.Quantity ++;        
                     exProduct.totalPrice = exProduct.Quantity * exProduct.ListPrice;
                     //System.debug('>>> orderItems to modify: ' + exProduct);
-                    //OrderProducs.put(tempProductId,exProduct);
+                    newOI.Quantity ++;
                     OrderProducs.put(tempProductId,exProduct);
+                    orderitems.put(newOI.id,newOI);
                 }else {                
                     sendList = true;
                     System.debug('>>> Product NOT Exist RUUUUUUUUUUUUUM');
@@ -112,22 +121,7 @@ public with sharing class orderProducts {
         return OrderProducs.values();
     }
 
-    public class OrderProductWrapper {
-        @AuraEnabled public String productName{get;set;}
-        @AuraEnabled public Id productId{get;set;}
-        @AuraEnabled public Decimal listPrice{get;set;}
-        @AuraEnabled public Decimal Quantity{get;set;}
-        @AuraEnabled public Decimal totalPrice{get;set;}
-    }
-
-    public class ProductWrapper {
-        @AuraEnabled public String productName{get;set;}
-        @AuraEnabled public Id productId{get;set;}
-        @AuraEnabled public Decimal listPrice{get;set;}
-        @AuraEnabled public Id PricebookEntryId{get;set;}
-
-    }
-    
+      
     public class AsyncOrderInsert implements Queueable {
         private List<OrderItem> OIListUpserted = new List<OrderItem>();
         private List<OrderItem> OIList = new List<OrderItem>();
@@ -160,6 +154,22 @@ public with sharing class orderProducts {
 
 
         }
+    }
+
+    public class OrderProductWrapper {
+        @AuraEnabled public String productName{get;set;}
+        @AuraEnabled public Id productId{get;set;}
+        @AuraEnabled public Decimal listPrice{get;set;}
+        @AuraEnabled public Decimal Quantity{get;set;}
+        @AuraEnabled public Decimal totalPrice{get;set;}
+    }
+
+    public class ProductWrapper {
+        @AuraEnabled public String productName{get;set;}
+        @AuraEnabled public Id productId{get;set;}
+        @AuraEnabled public Decimal listPrice{get;set;}
+        @AuraEnabled public Id PricebookEntryId{get;set;}
+
     }
 
 }

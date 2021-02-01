@@ -1,4 +1,4 @@
-@isTest (SeeAllData = true)
+@isTest //(SeeAllData = true)
 public with sharing class orderAvalaibleProducts_test {
     
     public class ProductWrapper {
@@ -8,58 +8,87 @@ public with sharing class orderAvalaibleProducts_test {
         @AuraEnabled public Id PricebookEntryId{get;set;}
     }
 
+    class testData {
+        Pricebook2 standard;
+        Order order;
+        List<Product2> Products = new List<Product2>();
+        List<PricebookEntry> PricebookEntryList = new List<PricebookEntry>();
+        List<ProductWrapper> wrapper1 = new List<ProductWrapper>();
+        List<ProductWrapper> wrapper2 = new List<ProductWrapper>();
+                
+        testData()
+        {
+            
+            Account acc = new Account();
+            acc.Name='Test1';
+            
+            insert acc;
+            
+            Product2 newproduct =new Product2();
+            newproduct.Name='test';
+            newproduct.productCode='1111';
+            newproduct.isActive = true;
+            Products.add(newproduct);
+
+            Product2 newproduct2 =new Product2();
+            newproduct2.Name='test2';
+            newproduct2.productCode='2222';
+            newproduct2.isActive = true;
+            Products.add(newproduct2);
+            
+            Product2 newproduct3 =new Product2();
+            newproduct3.Name='test3';
+            newproduct3.productCode='3333';
+            newproduct3.isActive = true;
+            Products.add(newproduct3);
+
+            insert Products;
+
+            /*standard = new Pricebook2();
+            standard.IsActive = true;
+            standard.Name = 'test Pricebook';
+            insert testPriceBook;*/
+
+            //standard = [Select Id, Name, IsActive, IsStandard From Pricebook2 where IsStandard = true LIMIT 1];
+            
+            standard = new Pricebook2(
+                Id = Test.getStandardPricebookId(),
+                IsActive = true);        
+                update standard;
+
+            for(Product2 prod : Products)
+            {
+
+                PricebookEntry pbeTest = new PricebookEntry();
+                pbeTest.pricebook2Id = standard.id;
+                pbeTest.product2id = prod.id;
+                pbeTest.unitprice = 1500.0;
+                pbeTest.isactive = true;
+                PricebookEntryList.add(pbeTest);     
+
+                
+                ProductWrapper pw = new ProductWrapper();
+                pw.productId = prod.id;
+                pw.PricebookEntryId = pbeTest.id;
+                pw.productName = prod.Name;
+                pw.listPrice = pbeTest.unitprice;
+                wrapper1.add(pw);
+
+            }
+            insert PricebookEntryList;
+            
+
+        }
+    }
+
     static testMethod void testAvalaibleProducts() {
-        Account acc = new Account();
-        acc.Name='Test1';
         
-        insert acc;
-        
-        Account acc2 = new Account();
-        acc2.Name='Test2';
-        
-        insert acc2;
-        
-        
-        Opportunity newOpp = new Opportunity();
-        newOpp.Name = 'TEst';
-        newOpp.StageName='Contratada';
-        newOpp.CloseDate=Date.today();
-        newOpp.AccountId = acc.Id;
-        
-        insert newOpp;
-        
-        Product2 newproduct =new Product2();
-        newproduct.Name='test';
-        newproduct.productCode='1234';
-        newproduct.isActive = true;
-        
-        insert newproduct;
-        
-        Pricebook2 standard = [Select Id, Name, IsActive, IsStandard From Pricebook2 where IsStandard = true LIMIT 1];
-        System.assertEquals(true, standard.IsStandard, standard.IsStandard );
-
-        PricebookEntry pbeTest = new PricebookEntry();
-        pbeTest.pricebook2Id = standard.id;
-        pbeTest.product2id = newproduct.id;
-        pbeTest.unitprice = 1249.0;
-        pbeTest.isactive = true;
-        insert pbeTest;     
-        
-        ProductWrapper pw = new ProductWrapper();
-        pw.productId = newproduct.id;
-        pw.PricebookEntryId = pbeTest.id;
-        pw.productName = newproduct.Name;
-        pw.listPrice = pbeTest.unitprice;
-
-        List<ProductWrapper> pwList = new List<ProductWrapper>();
-        pwList.add(pw);
-
-
         Test.startTest();
-        List<orderAvalaibleProducts.ProductWrapper> result = orderAvalaibleProducts.getOrderAvalaibleProducts(standard.Id);
+        testData data = new testData();
+        List<orderAvalaibleProducts.ProductWrapper> result = orderAvalaibleProducts.getOrderAvalaibleProducts(data.standard.Id);
         Test.stopTest();
 
-        System.assert(result.size() > 1, 'Error' + result.size());
+        System.assertEquals(result.size() , 3, 'result: ' + result);
 
 
                     

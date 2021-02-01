@@ -5,18 +5,16 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 const COLUMNS = [
   {label: 'Name', fieldName: 'productName', type: 'text'},
-  //{label: 'PricebookEntryId', fieldName: 'PricebookEntryId', type: 'text', typeAttributes: {display: 'none'}},
   {label: 'List Price', fieldName: 'listPrice', type: 'currency', cellAttributes: { alignment: 'center' } }
 ];
 
 export default class OrderProductsAvalaible extends LightningElement {
     columns = COLUMNS;
     @api recordId;
-    @api products = [];
-    @track pricebookEntryId;
-    @track PricebookEntries = [];
+    @api products = []; //Avalaible products in the order
+    @track pricebookEntryId; 
+    @track PricebookEntries = []; //PricebookEntries related to the products
     @track record;
-    @track temp;
     @track PBId;
     @track selectedProducts = [];
     @wire(getRecord, { recordId: '$recordId', fields: ['Order.Pricebook2Id'] })
