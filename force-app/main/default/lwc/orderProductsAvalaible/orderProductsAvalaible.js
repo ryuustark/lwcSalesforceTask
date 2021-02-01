@@ -17,45 +17,35 @@ export default class OrderProductsAvalaible extends LightningElement {
     @track record;
     @track PBId;
     @track selectedProducts = [];
+    //get data from the record
     @wire(getRecord, { recordId: '$recordId', fields: ['Order.Pricebook2Id'] })
     wiredPricebook({ error, data }) {
         if (data) {
             this.record = data;
-            //console.log('>>>PB Record Data: ' + JSON.stringify(this.record));
             this.PBId = this.record.fields.Pricebook2Id.value;
-            //console.log('>>>PB Record Data Pricebook ID: ' + JSON.stringify(this.PBId));
             this.error = undefined;
         } else if (error) {
             this.error = error;
             this.record = undefined;
         }
     };
-
+    //get productEntries from Order from Apex
     @wire(getProducts,  {PBId: '$PBId'}) //8014x0000004N79AAE//products;     @wire(getProducts,  {pricebookId: '$PBId'})
     wiredCase({error , data}) {
       if(data)
       {
           this.PricebookEntries = data;
           this.pricebookEntryId = data.pricebookEntryId;
-          //console.log('>>>Log Data: ' + JSON.stringify(this.PricebookEntries.pricebookEntryId));
-          //console.log('>>>Log Data UnitPrice: ' + JSON.stringify(this.PricebookEntries[0].UnitPrice));
-          //console.log('>>>Log Data Name: ' + JSON.stringify(this.PricebookEntries[0].Product2.Name));
-          
-        console.log('>>>Log Data ProductWrapper: ' + JSON.stringify(this.PricebookEntries));
       } else if(error) {
         console.warn('>>>Log Data Error: ' + JSON.stringify(error))
       }
   };
   
   
-  
-  handleAddClick(event) {
-    //console.log(">>> Add3 ");     
+  //Send Selected products to the Component 2
+  handleAddClick(event) {  
     this.selectedProducts = this.template.querySelector("lightning-datatable").getSelectedRows();    
     if(this.selectedProducts.length > 0){
-      console.log(">>> Sending Products to add..." );
-      console.log(">>> selectedProducts..." + JSON.stringify(this.selectedProducts));
-      
       //send data to child LWC
       this.template.querySelector("c-order-products-list").handleAddedProducts(this.selectedProducts);
     } else {
@@ -64,7 +54,7 @@ export default class OrderProductsAvalaible extends LightningElement {
     
   }
   
-     
+     //Show error in case the user do not select any products
     showErrorToast() {
       const evt = new ShowToastEvent({
           title: 'No Products Selected',

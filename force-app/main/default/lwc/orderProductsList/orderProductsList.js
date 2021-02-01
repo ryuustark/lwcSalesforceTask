@@ -18,7 +18,7 @@ export default class OrderProductsList extends LightningElement {
     @track orderproducts = [];
     @track record;
     @track insert = false;
-
+    // get OrderItems from the order
     @wire(getOrderProducts,  {orderId: '$recordid'}) //8014x0000004N79AAE//products;     @wire(getProducts,  {pricebookId: '$PBId'})
     wiredCase({error , data}) {
       if(data)
@@ -29,11 +29,11 @@ export default class OrderProductsList extends LightningElement {
         console.warn('>>>Log Data Error: ' + JSON.stringify(error))
       }
     };
-
+    //Called from Component 1, with the products that will be added
     @api handleAddedProducts(products)
     {
         this.insertedproducts = products;
-        //console.log('>>>sent products: ' + JSON.stringify(this.insertedproducts));
+        //call Apex Method
         UpdateOrderProducts(
           {OPw : this.orderproducts, 
           productsToInsert : this.insertedproducts,
@@ -43,17 +43,15 @@ export default class OrderProductsList extends LightningElement {
           .then(r => {
             this.orderproducts = r;
           });
-          //console.log('>>>Order products Change: ' + JSON.stringify(this.orderproducts));
-
-        //********* volver a poner success toast cuando ya funcione */
-        //this.showSuccessToast();
+          //show success toas when inserted
+          this.showSuccessToast();
 
     }
 
     showSuccessToast() {
         const evt = new ShowToastEvent({
             title: 'Toast Success',
-            message: 'Opearion sucessful ' + this.selectedProducts.length + ' Products were added.',
+            message: 'Opearion sucessful ' + this.insertedproducts.length + ' Products were added.',
             variant: 'success',
             mode: 'dismissable'
         });
