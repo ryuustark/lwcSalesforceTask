@@ -59,7 +59,7 @@ public with sharing class orderAvalaibleProducts_test {
         List<orderAvalaibleProducts.ProductWrapper> result = orderAvalaibleProducts.getOrderAvalaibleProducts(standard.Id);
         Test.stopTest();
 
-        System.assert(result.size() < 1, 'Error');
+        System.assert(result.size() > 1, 'Error' + result.size());
 
 
                     
