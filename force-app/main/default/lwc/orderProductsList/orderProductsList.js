@@ -51,7 +51,7 @@ export default class OrderProductsList extends LightningElement {
     showSuccessToast() {
         const evt = new ShowToastEvent({
             title: 'Toast Success',
-            message: 'Opearion sucessful ' + this.insertedproducts.length + ' Products were added.',
+            message: 'Opearion sucessful ' + this.insertedproducts.length + ' Product(s) were added.',
             variant: 'success',
             mode: 'dismissable'
         });
