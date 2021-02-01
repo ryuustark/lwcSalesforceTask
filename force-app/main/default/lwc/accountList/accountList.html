@@ -1,0 +1,17 @@
+<template>
+    <lightning-card title="Account-lists">
+        <template if:true={accounts.data} >
+            <lightning-datatable
+                key-field="Id"
+                data={accounts.data}
+                columns={columns}
+                selected-rows={tempSelectedids}
+            >
+            </lightning-datatable>
+            <lightning-button-group class="slds-align_absolute-center">
+                <lightning-button variant="brand" label="Add" title="Add account to list" onclick={handleAddClick} class="slds-m-left_x-small slds-m-top_x-small"></lightning-button>
+                <lightning-button variant="brand-outline" label="Remove" title="Remove Account from list" onclick={handleRemoveClick} class="slds-m-left_x-small slds-m-top_x-small"></lightning-button>
+            </lightning-button-group>
+        </template>
+    </lightning-card>
+</template>

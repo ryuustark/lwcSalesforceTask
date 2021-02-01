@@ -1,0 +1,21 @@
+<template>
+    <lightning-card title="Avalaible Product List">
+        <template if:true={record} >
+            <template if:true={PricebookEntries} >
+                <div class="slds-m-around_x-small">
+                <lightning-datatable
+                    class="slds-table_striped"
+                    key-field="Id"
+                    data={PricebookEntries}
+                    columns={columns}
+                    >
+                </lightning-datatable>
+                <lightning-button-group class="slds-align_absolute-center">
+                    <lightning-button variant="brand" label="Add" title="Add account to list" onclick={handleAddClick} class="slds-m-left_x-small slds-m-top_x-small"></lightning-button>
+                </lightning-button-group>
+                </div>
+            </template>
+        </template>
+    </lightning-card>
+        <c-order-products-list insertedproducts={products} recordid={recordId} ></c-order-products-list>
+</template>

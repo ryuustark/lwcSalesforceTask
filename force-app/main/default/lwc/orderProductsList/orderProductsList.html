@@ -1,0 +1,18 @@
+<template>
+    <lightning-card title="Order Products">
+        <template if:true={recordid} >
+                <template if:true={orderproducts}  >
+                    <div class="slds-m-around_x-small">
+                    <lightning-datatable
+                        class="slds-table_striped"
+                        key-field="Id"
+                        data={orderproducts}
+                        columns={columns}
+                        hide-checkbox-column
+                    >
+                    </lightning-datatable>
+                    </div>
+            </template>
+        </template>
+    </lightning-card>
+</template>
